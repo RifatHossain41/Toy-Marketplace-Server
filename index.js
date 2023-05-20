@@ -1,24 +1,23 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
-require('dotenv').config();
 const app = express();
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+require('dotenv').config();
 const port = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
 
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.vb42ct1.mongodb.net/?retryWrites=true&w=majority`;
-
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
-    version: ServerApiVersion.v1,
+    version: ServerApiVersion?.v1,
     strict: true,
     deprecationErrors: true,
   }
 });
+
 
 async function run() {
   try {
@@ -27,6 +26,40 @@ async function run() {
 
     const toyCollection = client.db('toy').collection('example');
 
+    app.get('/example', async(req, res) => {
+      const filter = {}
+      // let query = {};
+      // if(req.query?.email){
+      //   query = { email: req.query.email }
+      // }
+      const result = await toyCollection.find(filter).toArray();
+      res.send(result);
+    })
+
+    app.get('/mytoys/:email', async(req, res) => {
+      const email = req.params.email;
+      console.log(email)
+      const query = { email : email }
+      const result = await toyCollection.find(query).toArray()
+      res.send(result);
+    })
+
+    app.get('/details/:id', async(req, res) => {
+      const id = req.params.id;
+      console.log(id)
+      const query = { _id: new ObjectId(id) }
+      const result = await toyCollection.find(query)
+      res.send(result);
+    })
+
+    app.post('/example', async (req, res) => {
+      const allData = req.body;
+      console.log(allData);
+      const result = await toyCollection.insertOne(allData);
+      res.send(result)
+    });
+
+    
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
@@ -39,10 +72,10 @@ async function run() {
 run().catch(console.dir);
 
 
-app.get('/', (req, res) => {
-  res.send('Toy Marketplace server is running')
+app.get('/', (req, res) =>{
+  res.send('Toy Server Is Running')
 })
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`Toy Server Is Running on port${port}`)
 })
