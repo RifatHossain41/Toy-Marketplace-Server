@@ -27,18 +27,13 @@ async function run() {
     const toyCollection = client.db('toy').collection('example');
 
     app.get('/example', async(req, res) => {
-      const filter = {}
-      // let query = {};
-      // if(req.query?.email){
-      //   query = { email: req.query.email }
-      // }
-      const result = await toyCollection.find(filter).toArray();
+      const filter = {};
+      const result = await toyCollection.find(filter).limit(20).toArray();
       res.send(result);
     })
 
     app.get('/mytoys/:email', async(req, res) => {
       const email = req.params.email;
-      console.log(email)
       const query = { email : email }
       const result = await toyCollection.find(query).toArray()
       res.send(result);
@@ -46,7 +41,6 @@ async function run() {
 
     app.get('/details/:id', async(req, res) => {
       const id = req.params.id;
-      console.log(id)
       const query = { _id: new ObjectId(id) }
       const result = await toyCollection.find(query)
       res.send(result);
@@ -54,12 +48,18 @@ async function run() {
 
     app.post('/example', async (req, res) => {
       const allData = req.body;
-      console.log(allData);
       const result = await toyCollection.insertOne(allData);
       res.send(result)
     });
 
-    
+ 
+
+    app.delete('/example/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await toyCollection.deleteOne(query);
+      res.send(result);
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
